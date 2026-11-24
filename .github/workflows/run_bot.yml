@@ -1,0 +1,35 @@
+name: SJTU Bot Run
+
+on:
+  schedule:
+    - cron: '*/30 * * * *' # 每30分钟运行一次
+  workflow_dispatch:      # 允许你手动点击运行
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4
+
+      - name: Run bot
+        env:
+          SC_KEY: ${{ secrets.SC_KEY }}
+          CANVAS_TOKEN: ${{ secrets.CANVAS_TOKEN }}
+        run: python bot_pro.py
+
+      - name: Commit and push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "自动更新历史记录"
+          file_pattern: "history.txt"
